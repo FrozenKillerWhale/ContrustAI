@@ -138,17 +138,26 @@ def show_agreement_ui():
         # --- END OF LINK PLACEHOLDERS ---
 
     # Consent checkbox
-    # ⚠️ 핵심 수정 부분: 체크박스 변경 여부를 확인하는 콜백 함수 추가
+    # ⚠️ 핵심 수정 부분: 체크박스 변경 여부를 확인하고 콜백 함수를 사용 (안정성 증대)
+    # 콜백 함수 정의
+    def set_agreed_state():
+        st.session_state.agreed_to_terms = True
+
     agree_checkbox = st.checkbox(
         "I have read and agree to the Terms of Service and Privacy Policy regarding data collection and usage.",
-        key="agreement_checkbox_key" # 고유한 키 추가 (필수)
+        key="agreement_checkbox_key", # 고유한 키 추가 (필수)
+        on_change=set_agreed_state # 체크박스 상태 변경 시 함수 호출
     )
 
-    # ⚠️ 핵심 수정 부분: 체크박스가 활성화(클릭)되었을 때만 세션 상태를 변경
+    # 체크박스가 선택되었지만 아직 세션 상태가 True가 아닌 경우 (초기 로드 시)
     if agree_checkbox and not st.session_state.agreed_to_terms:
-        st.session_state.agreed_to_terms = True
-        st.success("Thank you for agreeing! You can now use the service.")
-        st.experimental_rerun() # 동의 후 앱을 새로고침하여 메인 앱 표시
+        # 이전에 발생한 오류의 원인 중 하나가 이중 호출일 수 있으므로,
+        # 여기서는 바로 rerun 하지 않고, on_change 콜백에 의존합니다.
+        # 만약 콜백이 작동하지 않는 Streamlit 구 버전이라면,
+        # 아래 st.success 다음에 st.experimental_rerun()을 다시 활성화해야 할 수도 있습니다.
+        st.success("Thank you for agreeing! Please refresh the page or wait for the app to reload.")
+        # 만약 위의 수정으로도 오류가 지속되면, 아래 줄의 주석을 해제하세요.
+        # st.experimental_rerun() # 동의 후 앱을 새로고침하여 메인 앱 표시
 
 
 # --- Main App Execution Flow Control ---
