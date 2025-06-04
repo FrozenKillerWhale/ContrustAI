@@ -93,19 +93,21 @@ def main_app():
             st.warning("Please paste some text into the box to start the analysis.")
 
     # --- Donation Link Section (Will be updated after publishing URL is available) ---
-    st.markdown("---")
-    st.subheader("💡 Support ConTrust AI!")
-    st.write("Your support helps us improve the service and advance our AI models.")
-    # ✨ 수정된 부분: st.link_button을 사용하여 버튼을 가로로 배치
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.link_button("Buy Me a Coffee! ☕", url="https://www.buymeacoffee.com/yourusername") # 실제 링크로 변경
-    with col2:
-        st.link_button("Contact Us 📧", url="mailto:your.email@example.com") # 실제 이메일 주소로 변경
-    with col3:
-        st.link_button("Take Survey 📝", url="your_survey_url") # 실제 설문조사 URL로 변경
-    st.write("Thank you for your valuable contribution!")
-
+st.markdown("---")
+st.subheader("💡 Support ConTrust AI!")
+st.write("Your support helps us improve the service and advance our AI models.")
+# ✨ 수정된 부분: st.link_button을 사용하여 버튼을 가로로 배치
+col1, col2, col3 = st.columns(3)
+with col1:
+    # 당신의 실제 Buy Me a Coffee 페이지 주소를 넣습니다.
+    st.link_button("Buy Me a Coffee! ☕", url="https://coff.ee/cloar") #
+with col2:
+    # 실제 이메일 주소를 넣습니다. 예: "mailto:support@contrust.ai"
+    st.link_button("Contact Us 📧", url="mailto:contact@cloar.tech") # **당신의 실제 이메일 주소로 변경해주세요!**
+with col3:
+    # 실제 설문조사 URL을 넣습니다. 예: "https://forms.gle/your_survey_id"
+    st.link_button("Take Survey 📝", url="your_survey_url") # **당신의 실제 설문조사 URL로 변경해주세요!**
+st.write("Thank you for your valuable contribution!")
 
 # --- Agreement UI Function ---
 # This function displays the terms & privacy agreement before the main app loads.
