@@ -96,9 +96,14 @@ def main_app():
     st.markdown("---")
     st.subheader("💡 Support ConTrust AI!")
     st.write("Your support helps us improve the service and advance our AI models.")
-    # IMPORTANT: Replace 'https://www.buymeacoffee.com/yourusername' with your actual Buy Me a Coffee link.
-    # ✨ 수정된 부분: st.button 대신 st.link_button 사용
-    st.link_button("Buy Me a Coffee! ☕", url="https://www.buymeacoffee.com/yourusername")
+    # ✨ 수정된 부분: st.link_button을 사용하여 버튼을 가로로 배치
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.link_button("Buy Me a Coffee! ☕", url="https://www.buymeacoffee.com/yourusername") # 실제 링크로 변경
+    with col2:
+        st.link_button("Contact Us 📧", url="mailto:your.email@example.com") # 실제 이메일 주소로 변경
+    with col3:
+        st.link_button("Take Survey 📝", url="your_survey_url") # 실제 설문조사 URL로 변경
     st.write("Thank you for your valuable contribution!")
 
 
