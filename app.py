@@ -104,35 +104,46 @@ def main_app():
 # --- Agreement UI Function ---
 # This function displays the terms & privacy agreement before the main app loads.
 def show_agreement_ui():
+    # ✨ 추가된 부분: 동의 화면 상단에도 앱 이름 표시
+    st.title("✨ ConTrust AI")
     st.header("Please Agree to Our Terms to Continue")
-    st.markdown("""
-    Thank you for using **ConTrust AI**!
 
-    To provide you with the best service and continuously improve our AI models, we utilize the text you input for analysis. Your input content helps us:
-    * **Enhance the accuracy of our AI detection and originality checks.**
-    * **Advance the development of our `Galad AI` sociopsychological profiling models.**
+    # 텍스트 내용 전체를 st.expander 안에 넣어 접기
+    with st.expander("Read Important Information Regarding Data Collection & Usage"):
+        st.markdown("""
+        Thank you for using **ConTrust AI**!
 
-    **✅ Important Information:**
-    * **Only the text content you input for analysis is collected.** We do not collect any other personal information from you.
-    * All collected text data is **fully anonymized**, meaning it cannot be linked back to you or any specific individual.
-    * Anonymized data is used **solely for service improvement and AI model training purposes.**
-    * For more details, please refer to our full policies below.
-    """)
+        To provide you with the best service and continuously improve our AI models, we utilize the text you input for analysis. Your input content helps us:
+        * **Enhance the accuracy of our AI detection and originality checks.**
+        * **Advance the development of our `Galad AI` sociopsychological profiling models.**
 
-    # --- IMPORTANT: Replace these links with your actual URLs ---
-    # You will need to create these pages (e.g., on your Cloar.tech domain or a separate Streamlit page)
-    st.markdown("""
-    [Terms of Service](https://cloar.tech/terms_of_service) | [Privacy Policy](https://cloar.tech/privacy_policy)
-    """)
-    # --- END OF LINK PLACEHOLDERS ---
+        **✅ Important Information:**
+        * **Only the text content you input for analysis is collected.** We do not collect any other personal information from you.
+        * All collected text data is **fully anonymized**, meaning it cannot be linked back to you or any specific individual.
+        * Anonymized data is used **solely for service improvement and AI model training purposes.**
+        * For more details, please refer to our full policies below.
+        """)
+
+        # --- IMPORTANT: Replace these links with your actual URLs ---
+        # You will need to create these pages (e.g., on your Cloar.tech domain or a separate Streamlit page)
+        st.markdown("""
+        [Terms of Service](https://cloar.tech/terms_of_service) | [Privacy Policy](https://cloar.tech/privacy_policy)
+        """)
+        # --- END OF LINK PLACEHOLDERS ---
 
     # Consent checkbox
-    agree_checkbox = st.checkbox("I have read and agree to the Terms of Service and Privacy Policy regarding data collection and usage.")
+    # ⚠️ 핵심 수정 부분: 체크박스 변경 여부를 확인하는 콜백 함수 추가
+    agree_checkbox = st.checkbox(
+        "I have read and agree to the Terms of Service and Privacy Policy regarding data collection and usage.",
+        key="agreement_checkbox_key" # 고유한 키 추가 (필수)
+    )
 
-    if agree_checkbox:
+    # ⚠️ 핵심 수정 부분: 체크박스가 활성화(클릭)되었을 때만 세션 상태를 변경
+    if agree_checkbox and not st.session_state.agreed_to_terms:
         st.session_state.agreed_to_terms = True
         st.success("Thank you for agreeing! You can now use the service.")
-        st.experimental_rerun() # Reload the app to show the main content
+        st.experimental_rerun() # 동의 후 앱을 새로고침하여 메인 앱 표시
+
 
 # --- Main App Execution Flow Control ---
 # This is the entry point of your Streamlit app.
