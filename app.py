@@ -97,7 +97,8 @@ def main_app():
     st.subheader("💡 Support ConTrust AI!")
     st.write("Your support helps us improve the service and advance our AI models.")
     # IMPORTANT: Replace 'https://www.buymeacoffee.com/yourusername' with your actual Buy Me a Coffee link.
-    st.markdown("[Click here to Buy Me a Coffee! ☕](https://www.buymeacoffee.com/yourusername)", unsafe_allow_html=True)
+    # ✨ 수정된 부분: 마크다운 링크 대신 Streamlit 버튼으로 변경
+    st.button("Buy Me a Coffee! ☕", url="https://www.buymeacoffee.com/yourusername")
     st.write("Thank you for your valuable contribution!")
 
 
