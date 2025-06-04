@@ -1,8 +1,6 @@
 import streamlit as st
 
 # --- Global CSS Injection ---
-# This CSS applies custom styles to buttons and textareas across the app.
-# Place this at the very top, right after imports, for app-wide styling.
 st.markdown(
     """
     <style>
@@ -39,21 +37,18 @@ st.markdown(
 
 
 # --- Session State Initialization (Check for user consent) ---
-# This ensures 'agreed_to_terms' is always in session_state, initialized to False
-# It controls whether the app shows the consent UI or the main features.
 if 'agreed_to_terms' not in st.session_state:
     st.session_state.agreed_to_terms = False
 
 
 # --- Agreement UI Function ---
-# This function displays the terms & privacy agreement before the main app loads.
 def show_agreement_ui():
     st.title("✨ ConTrust AI")
     st.header("Please Agree to Our Terms to Continue")
 
     with st.expander("Read Important Information Regarding Data Collection & Usage"):
         st.markdown("""
-        Thank you for using **ConTrust AI**!
+        Thankophobia you for using **ConTrust AI**!
 
         To provide you with the best service and continuously improve our AI models, we utilize the text you input for analysis. Your input content helps us:
         * **Enhance the accuracy of our AI detection and originality checks.**
@@ -71,11 +66,10 @@ def show_agreement_ui():
         """)
 
     # --- Agreement checkbox and handling ---
-    # 콜백 함수: 체크박스가 변경되면 세션 상태를 True로 설정
+    # 콜백 함수: 체크박스가 변경되면 세션 상태만 True로 설정하고,
+    # 재실행은 메인 App Execution Flow Control에서 담당하도록 변경
     def agree_checkbox_callback():
         st.session_state.agreed_to_terms = True
-        # 콜백 내에서 즉시 rerun을 시도 (문제 발생 시 주석 처리하고 아래 메인 로직에서 제어)
-        st.experimental_rerun()
 
     st.checkbox(
         "I have read and agree to the Terms of Service and Privacy Policy regarding data collection and usage.",
@@ -83,12 +77,13 @@ def show_agreement_ui():
         on_change=agree_checkbox_callback # 체크박스 변경 시 콜백 함수 호출
     )
 
-    # Note: `st.success` 메시지는 콜백이 즉시 rerun을 호출할 때 화면에 잠깐만 보일 수 있습니다.
-    # 동의 후 앱 재실행 로직은 주로 `if not st.session_state.agreed_to_terms` 외부에서 제어됩니다.
+    # Note: `st.success` 메시지는 콜백이 즉시 rerun을 호출하지 않으므로,
+    # 여기서는 동의 후 바로 메인 앱으로 넘어가지 않는다면 메시지를 표시할 수 있습니다.
+    if st.session_state.agreed_to_terms: # 콜백이 상태를 True로 변경했을 때 (다음 런에서)
+        st.success("Thank you for agreeing! Loading the main application...")
 
 
 # --- Main Application Logic Function ---
-# This function contains the core features of your ConTrust AI service.
 def main_app():
     st.title("✨ ConTrust AI: Content Authenticity & Originality Analysis")
     st.write("Enter your content below to check its authenticity and originality.")
@@ -138,20 +133,18 @@ def main_app():
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        # 당신의 실제 Buy Me a Coffee 페이지 주소를 넣습니다.
-        st.link_button("Buy Me a Coffee! ☕", url="https://coff.ee/cloar") # 실제 링크 적용 완료!
+        st.link_button("Buy Me a Coffee! ☕", url="https://coff.ee/cloar")
     with col2:
-        # 실제 이메일 주소를 넣습니다.
-        st.link_button("Contact Us 📧", url="mailto:contact@cloar.tech") # 실제 이메일 주소 적용 완료!
+        st.link_button("Contact Us 📧", url="mailto:contact@cloar.tech")
     with col3:
-        # 실제 설문조사 URL을 넣습니다. **이 부분은 당신이 직접 만든 설문조사 URL로 변경해야 합니다.**
-        st.link_button("Take Survey 📝", url="YOUR_ACTUAL_SURVEY_URL_HERE")
+        st.link_button("Take Survey 📝", url="YOUR_ACTUAL_SURVEY_URL_HERE") # **당신의 실제 설문조사 URL로 변경해주세요!**
     st.write("Thank you for your valuable contribution!")
 
 
 # --- Main App Execution Flow Control ---
 # This is the entry point of your Streamlit app.
 # It checks if the user has agreed to the terms; if not, it shows the agreement UI.
+# 동의 상태가 True로 바뀌면, 다음 Streamlit 런에서 main_app()이 호출됩니다.
 if not st.session_state.agreed_to_terms:
     show_agreement_ui()
 else:
