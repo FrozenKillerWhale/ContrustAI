@@ -125,20 +125,20 @@ def main_app():
         else:
             st.warning("Please paste some text into the box to start the analysis.")
 
-    # --- Donation Link Section ---
-    # 이 섹션은 main_app() 함수 내부에 있어야 앱이 로드된 후에만 표시됩니다.
-    st.markdown("---")
-    st.subheader("💡 Support ConTrust AI!")
-    st.write("Your support helps us improve the service and advance our AI models.")
+# --- Donation Link Section ---
+st.markdown("---")
+st.subheader("💡 Support ConTrust AI!")
+st.write("Your support helps us improve the service and advance our AI models.")
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.link_button("Buy Me a Coffee! ☕", url="https://coff.ee/cloar")
-    with col2:
-        st.link_button("Contact Us 📧", url="mailto:contact@cloar.tech")
-    with col3:
-        st.link_button("Take Survey 📝", url="https://forms.gle/bsPrVBZnwpWMizDU9") # **당신의 실제 설문조사 URL로 변경해주세요!**
-    st.write("Thank you for your valuable contribution!")
+col1, col2, col3 = st.columns(3)
+with col1:
+    st.link_button("Buy Me a Coffee! ☕", url="https://coff.ee/cloar")
+with col2:
+    st.link_button("Contact Us 📧", url="mailto:contact@cloar.tech")
+with col3:
+    # 당신의 실제 설문조사 URL로 변경합니다.
+    st.link_button("Take Survey 📝", url="https://forms.gle/bsPrVBZnwpWMizDU9") # ✨ 여기를 업데이트했습니다!
+st.write("Thank you for your valuable contribution!")
 
 
 # --- Main App Execution Flow Control ---
