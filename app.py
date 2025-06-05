@@ -137,7 +137,7 @@ def main_app():
     with col2:
         st.link_button("Contact Us 📧", url="mailto:contact@cloar.tech")
     with col3:
-        st.link_button("Take Survey 📝", url="YOUR_ACTUAL_SURVEY_URL_HERE") # **당신의 실제 설문조사 URL로 변경해주세요!**
+        st.link_button("Take Survey 📝", url="https://forms.gle/bsPrVBZnwpWMizDU9") # **당신의 실제 설문조사 URL로 변경해주세요!**
     st.write("Thank you for your valuable contribution!")
 
 
