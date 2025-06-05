@@ -48,7 +48,7 @@ def show_agreement_ui():
 
     with st.expander("Read Important Information Regarding Data Collection & Usage"):
         st.markdown("""
-        Thankophobia you for using **ConTrust AI**!
+        Thank you for using **ConTrust AI**!
 
         To provide you with the best service and continuously improve our AI models, we utilize the text you input for analysis. Your input content helps us:
         * **Enhance the accuracy of our AI detection and originality checks.**
@@ -66,8 +66,8 @@ def show_agreement_ui():
         """)
 
     # --- Agreement checkbox and handling ---
-    # 콜백 함수: 체크박스가 변경되면 세션 상태만 True로 설정하고,
-    # 재실행은 메인 App Execution Flow Control에서 담당하도록 변경
+    # 콜백 함수: 체크박스가 변경되면 세션 상태만 True로 설정합니다.
+    # st.experimental_rerun()은 호출하지 않습니다.
     def agree_checkbox_callback():
         st.session_state.agreed_to_terms = True
 
@@ -77,10 +77,10 @@ def show_agreement_ui():
         on_change=agree_checkbox_callback # 체크박스 변경 시 콜백 함수 호출
     )
 
-    # Note: `st.success` 메시지는 콜백이 즉시 rerun을 호출하지 않으므로,
-    # 여기서는 동의 후 바로 메인 앱으로 넘어가지 않는다면 메시지를 표시할 수 있습니다.
-    if st.session_state.agreed_to_terms: # 콜백이 상태를 True로 변경했을 때 (다음 런에서)
-        st.success("Thank you for agreeing! Loading the main application...")
+    # 사용자가 동의 체크박스를 클릭했을 때 표시되는 메시지
+    # 앱이 자동으로 재실행되지 않으므로, 이 메시지를 통해 사용자에게 안내합니다.
+    if st.session_state.agreed_to_terms:
+        st.success("Thank you for agreeing! The app will reload to show the main features. Please wait or refresh the page if it doesn't automatically transition.")
 
 
 # --- Main Application Logic Function ---
@@ -125,26 +125,23 @@ def main_app():
         else:
             st.warning("Please paste some text into the box to start the analysis.")
 
-# --- Donation Link Section ---
-st.markdown("---")
-st.subheader("💡 Support ConTrust AI!")
-st.write("Your support helps us improve the service and advance our AI models.")
+    # --- Donation Link Section ---
+    st.markdown("---")
+    st.subheader("💡 Support ConTrust AI!")
+    st.write("Your support helps us improve the service and advance our AI models.")
 
-col1, col2, col3 = st.columns(3)
-with col1:
-    st.link_button("Buy Me a Coffee! ☕", url="https://coff.ee/cloar")
-with col2:
-    st.link_button("Contact Us 📧", url="mailto:contact@cloar.tech")
-with col3:
-    # 당신의 실제 설문조사 URL로 변경합니다.
-    st.link_button("Take Survey 📝", url="https://forms.gle/bsPrVBZnwpWMizDU9") # ✨ 여기를 업데이트했습니다!
-st.write("Thank you for your valuable contribution!")
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.link_button("Buy Me a Coffee! ☕", url="https://coff.ee/cloar")
+    with col2:
+        st.link_button("Contact Us 📧", url="mailto:contact@cloar.tech")
+    with col3:
+        st.link_button("Take Survey 📝", url="https://forms.gle/bsPrVBZnwpWMizDU9")
+    st.write("Thank you for your valuable contribution!")
 
 
 # --- Main App Execution Flow Control ---
-# This is the entry point of your Streamlit app.
-# It checks if the user has agreed to the terms; if not, it shows the agreement UI.
-# 동의 상태가 True로 바뀌면, 다음 Streamlit 런에서 main_app()이 호출됩니다.
+# 이 부분은 변경되지 않았습니다.
 if not st.session_state.agreed_to_terms:
     show_agreement_ui()
 else:
