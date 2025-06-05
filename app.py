@@ -1,4 +1,6 @@
 import streamlit as st
+import os
+from anthropic import Anthropic
 
 # --- Global CSS Injection ---
 st.markdown(
@@ -35,52 +37,96 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-
 # --- Session State Initialization (Check for user consent) ---
 if 'agreed_to_terms' not in st.session_state:
     st.session_state.agreed_to_terms = False
 
 
 # --- Agreement UI Function ---
-def show_agreement_ui():
-    st.title("✨ ConTrust AI")
-    st.header("Please Agree to Our Terms to Continue")
+def show_agreement_ui(placeholder): # placeholder 인자를 받도록 변경
+    with placeholder.container(): # placeholder 컨테이너 안에 UI를 그립니다.
+        st.title("✨ ConTrust AI")
+        st.header("Please Agree to Our Terms to Continue")
 
-    with st.expander("Read Important Information Regarding Data Collection & Usage"):
-        st.markdown("""
-        Thank you for using **ConTrust AI**!
+        with st.expander("Read Important Information Regarding Data Collection & Usage"):
+            st.markdown("""
+            Thank you for using **ConTrust AI**!
 
-        To provide you with the best service and continuously improve our AI models, we utilize the text you input for analysis. Your input content helps us:
-        * **Enhance the accuracy of our AI detection and originality checks.**
-        * **Advance the development of our `Galad AI` sociopsychological profiling models.**
+            To provide you with the best service and continuously improve our AI models, we utilize the text you input for analysis. Your input content helps us:
+            * **Enhance the accuracy of our AI detection and originality checks.**
+            * **Advance the development of our `Galad AI` sociopsychological profiling models.**
 
-        **✅ Important Information:**
-        * **Only the text content you input for analysis is collected.** We do not collect any other personal information from you.
-        * All collected text data is **fully anonymized**, meaning it cannot be linked back to you or any specific individual.
-        * Anonymized data is used **solely for service improvement and AI model training purposes.**
-        * For more details, please refer to our full policies below.
-        """)
+            **✅ Important Information:**
+            * **Only the text content you input for analysis is collected.** We do not collect any other personal information from you.
+            * All collected text data is **fully anonymized**, meaning it cannot be linked back to you or any specific individual.
+            * Anonymized data is used **solely for service improvement and AI model training purposes.**
+            * For more details, please refer to our full policies below.
+            """)
 
-        st.markdown("""
-        [Terms of Service](https://cloar.tech/terms_of_service) | [Privacy Policy](https://cloar.tech/privacy_policy)
-        """)
+            st.markdown("""
+            [Terms of Service](https://cloar.tech/terms_of_service) | [Privacy Policy](https://cloar.tech/privacy_policy)
+            """)
 
-    # --- Agreement checkbox and handling ---
-    # 콜백 함수: 체크박스가 변경되면 세션 상태만 True로 설정합니다.
-    # st.experimental_rerun()은 호출하지 않습니다.
-    def agree_checkbox_callback():
-        st.session_state.agreed_to_terms = True
+        def agree_checkbox_callback():
+            st.session_state.agreed_to_terms = True
+            placeholder.empty() # ✨ 체크박스 동의 시 placeholder를 비웁니다.
 
-    st.checkbox(
-        "I have read and agree to the Terms of Service and Privacy Policy regarding data collection and usage.",
-        key="agreement_checkbox_key",
-        on_change=agree_checkbox_callback # 체크박스 변경 시 콜백 함수 호출
-    )
+        st.checkbox(
+            "I have read and agree to the Terms of Service and Privacy Policy regarding data collection and usage.",
+            key="agreement_checkbox_key",
+            on_change=agree_checkbox_callback # 체크박스 변경 시 콜백 함수 호출
+        )
 
-    # 사용자가 동의 체크박스를 클릭했을 때 표시되는 메시지
-    # 앱이 자동으로 재실행되지 않으므로, 이 메시지를 통해 사용자에게 안내합니다.
-    if st.session_state.agreed_to_terms:
-        st.success("Thank you for agreeing! The app will reload to show the main features. Please wait or refresh the page if it doesn't automatically transition.")
+
+# --- Claude API 클라이언트 초기화 ---
+try:
+    client = Anthropic(api_key=st.secrets["ANTHROPIC_API_KEY"])
+except KeyError:
+    st.error("Anthropic API 키를 찾을 수 없습니다. '.streamlit/secrets.toml' 파일에 ANTHROPIC_API_KEY를 설정했는지 확인하세요.")
+    client = None
+
+
+# --- 텍스트 분석 함수 (Claude API 호출) ---
+def analyze_text_with_claude(text):
+    if not client:
+        return {"ai_score": 0.0, "originality_score": 0.0, "details": "API Client not initialized due to missing API key."}
+
+    try:
+        response = client.messages.create(
+            model="claude-3-sonnet-20240229",
+            max_tokens=500,
+            messages=[
+                {"role": "user", "content": f"""
+                Please analyze the following text for its likelihood of being AI-generated and its overall originality.
+                Provide your analysis in a structured JSON format with two scores (0.0 to 1.0):
+                - 'ai_score': Probability that the text was generated by AI (0.0 for human, 1.0 for fully AI).
+                - 'originality_score': How original the content appears (0.0 for highly plagiarized/unoriginal, 1.0 for highly original).
+                Also, provide a brief 'reasoning' for each score.
+
+                Text to analyze:
+                {text}
+                """}
+            ]
+        )
+
+        response_content = response.content[0].text
+        if "```json" in response_content:
+            json_str = response_content.split("```json")[1].split("```")[0].strip()
+        else:
+            json_str = response_content.strip()
+
+        import json
+        analysis_result = json.loads(json_str)
+
+        return {
+            "ai_score": analysis_result.get("ai_score", 0.0),
+            "originality_score": analysis_result.get("originality_score", 0.0),
+            "details": analysis_result.get("reasoning", {})
+        }
+
+    except Exception as e:
+        st.error(f"Error calling Claude API: {e}")
+        return {"ai_score": 0.0, "originality_score": 0.0, "details": f"API call failed: {e}"}
 
 
 # --- Main Application Logic Function ---
@@ -92,35 +138,55 @@ def main_app():
 
     if st.button("Analyze Content"):
         if user_input_text:
-            with st.spinner("Analyzing your content..."):
-                # --- PHASE 0 MVP LOGIC PLACEHOLDER ---
-                import time
-                time.sleep(2) # Simulate analysis time
+            if client is None:
+                st.warning("Cannot perform analysis: Anthropic API client is not initialized. Please set up your API key.")
+            else:
+                with st.spinner("Analyzing your content with Claude AI..."):
+                    analysis_results = analyze_text_with_claude(user_input_text)
 
-                ai_score = 0.75 # Example: 75% AI generated probability
-                originality_score = 0.60 # Example: 60% originality score
+                    ai_score = analysis_results["ai_score"]
+                    originality_score = analysis_results["originality_score"]
+                    details = analysis_results["details"]
 
-                st.subheader("Analysis Results:")
+                    st.subheader("Analysis Results:")
 
-                # AI Detection Result Display
-                if ai_score > 0.5:
-                    st.error(f"**AI Generated Probability:** {ai_score*100:.1f}% 🤖")
-                    st.write("This content shows characteristics commonly found in AI-generated text. Consider reviewing for human touch.")
-                else:
-                    st.success(f"**AI Generated Probability:** {ai_score*100:.1f}% 🧑‍💻")
-                    st.write("This content appears to be human-generated or heavily edited by a human.")
+                    # AI Detection Result Display
+                    if ai_score > 0.5:
+                        st.error(f"**AI Generated Probability:** {ai_score*100:.1f}% 🤖")
+                        if "ai_score" in details:
+                            st.write(f"*{details['ai_score']}*")
+                        elif isinstance(details, str):
+                            st.write(f"*{details}*")
+                        else:
+                            st.write("This content shows characteristics commonly found in AI-generated text. Consider reviewing for human touch.")
+                    else:
+                        st.success(f"**AI Generated Probability:** {ai_score*100:.1f}% 🧑‍💻")
+                        if "ai_score" in details:
+                            st.write(f"*{details['ai_score']}*")
+                        elif isinstance(details, str):
+                            st.write(f"*{details}*")
+                        else:
+                            st.write("This content appears to be human-generated or heavily edited by a human.")
 
-                # Originality Check Result Display
-                st.info(f"**Content Originality Score:** {originality_score*100:.1f}% ✨")
-                if originality_score < 0.7:
-                    st.warning("This content might contain similar phrases or ideas found in existing sources. Review for potential duplication.")
-                else:
-                    st.success("Your content appears highly original!")
+                    # Originality Check Result Display
+                    st.info(f"**Content Originality Score:** {originality_score*100:.1f}% ✨")
+                    if originality_score < 0.7:
+                        if "originality_score" in details:
+                            st.warning(f"*{details['originality_score']}*")
+                        elif isinstance(details, str):
+                            st.warning(f"*{details}*")
+                        else:
+                            st.warning("This content might contain similar phrases or ideas found in existing sources. Review for potential duplication.")
+                    else:
+                        if "originality_score" in details:
+                            st.success(f"*{details['originality_score']}*")
+                        elif isinstance(details, str):
+                            st.success(f"*{details}*")
+                        else:
+                            st.success("Your content appears highly original!")
 
-                st.markdown("---")
-                st.write("💡 *Note: These are initial analysis results. For a more detailed breakdown, consider our advanced features.*")
-
-                # --- END OF PHASE 0 MVP LOGIC PLACEHOLDER ---
+                    st.markdown("---")
+                    st.write("💡 *Note: These are initial analysis results. For a more detailed breakdown, consider our advanced features.*")
 
         else:
             st.warning("Please paste some text into the box to start the analysis.")
@@ -132,17 +198,19 @@ def main_app():
 
     col1, col2, col3 = st.columns(3)
     with col1:
-        st.link_button("Buy Me a Coffee! ☕", url="https://coff.ee/cloar")
+        st.link_button("Buy Me a Coffee! ☕", url="[https://coff.ee/cloar](https://coff.ee/cloar)")
     with col2:
         st.link_button("Contact Us 📧", url="mailto:contact@cloar.tech")
     with col3:
-        st.link_button("Take Survey 📝", url="https://forms.gle/bsPrVBZnwpWMizDU9")
+        st.link_button("Take Survey 📝", url="[https://forms.gle/bsPrVBZnwpWMizDU9](https://forms.gle/bsPrVBZnwpWMizDU9)")
     st.write("Thank you for your valuable contribution!")
 
 
 # --- Main App Execution Flow Control ---
-# 이 부분은 변경되지 않았습니다.
+main_placeholder = st.empty()
+
 if not st.session_state.agreed_to_terms:
-    show_agreement_ui()
+    show_agreement_ui(main_placeholder)
 else:
+    main_placeholder.empty()
     main_app()

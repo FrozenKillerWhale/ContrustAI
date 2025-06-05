@@ -3,3 +3,4 @@ streamlit
 # sentence-transformers
 # anthropic
 # langchain
+anthropic
